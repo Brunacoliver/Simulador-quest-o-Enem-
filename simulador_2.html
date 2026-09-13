@@ -1,0 +1,2589 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Equilíbrio Químico — Cartão de Cobalto</title>
+
+<style>
+
+/* =========================================================
+   CONFIGURAÇÕES GERAIS
+========================================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background:
+        radial-gradient(circle at top left, #202b4d, transparent 40%),
+        linear-gradient(135deg, #101525, #1c2540, #111827);
+    color: white;
+    min-height: 100vh;
+}
+
+header {
+    text-align: center;
+    padding: 28px 15px;
+    background: rgba(0,0,0,0.25);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+header h1 {
+    margin: 0;
+    font-size: 30px;
+}
+
+header p {
+    margin-top: 8px;
+    color: #cbd5e1;
+}
+
+
+/* =========================================================
+   QUESTÃO
+========================================================= */
+
+.question-box {
+    max-width: 1100px;
+    margin: 25px auto;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+}
+
+.question-header {
+    background: rgba(59,130,246,0.18);
+    padding: 15px 20px;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.question-text {
+    padding: 20px 25px;
+    line-height: 1.6;
+    color: #e5e7eb;
+}
+
+.question-reaction {
+    text-align: center;
+    font-size: 25px;
+    font-weight: bold;
+    margin: 25px 0;
+    padding: 20px;
+    border-radius: 14px;
+    background: rgba(0,0,0,0.25);
+}
+
+.blue-text {
+    color: #60a5fa;
+}
+
+.pink-text {
+    color: #f472b6;
+}
+
+.energy-question {
+    display: block;
+    margin-top: 8px;
+    font-size: 18px;
+    color: #fbbf24;
+}
+
+.color-indicator {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 45px;
+    margin: 20px 0;
+}
+
+.color-side {
+    text-align: center;
+}
+
+.color-side strong {
+    display: block;
+    margin-top: 7px;
+}
+
+.color-side small {
+    color: #94a3b8;
+}
+
+.blue-square,
+.pink-square {
+    width: 55px;
+    height: 55px;
+    border-radius: 10px;
+    margin: auto;
+}
+
+.blue-square {
+    background: #2563eb;
+    box-shadow: 0 0 20px rgba(37,99,235,0.7);
+}
+
+.pink-square {
+    background: #ec4899;
+    box-shadow: 0 0 20px rgba(236,72,153,0.7);
+}
+
+.reaction-arrow {
+    font-size: 35px;
+    color: #cbd5e1;
+}
+
+.alternatives {
+    margin-top: 20px;
+}
+
+.alternative {
+    padding: 10px 15px;
+    margin: 6px 0;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.04);
+}
+
+
+/* =========================================================
+   CONTAINER
+========================================================= */
+
+.container {
+    max-width: 1100px;
+    margin: auto;
+    padding: 20px;
+}
+
+
+/* =========================================================
+   ETAPAS
+========================================================= */
+
+.steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.step {
+    padding: 12px;
+    text-align: center;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.06);
+    color: #94a3b8;
+    font-size: 14px;
+    transition: 0.4s;
+}
+
+.step.active {
+    background: #2563eb;
+    color: white;
+    box-shadow: 0 5px 20px rgba(37,99,235,0.25);
+}
+
+
+/* =========================================================
+   SIMULADOR
+========================================================= */
+
+.simulator {
+    background: rgba(255,255,255,0.06);
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+}
+
+
+/* =========================================================
+   AMBIENTE
+========================================================= */
+
+.environment {
+    position: relative;
+    height: 330px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    overflow: hidden;
+
+    border-radius: 18px;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(37,99,235,0.12),
+            rgba(255,255,255,0.02),
+            rgba(236,72,153,0.12)
+        );
+
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.zone {
+    width: 40%;
+    text-align: center;
+    position: relative;
+    height: 100%;
+    padding-top: 25px;
+}
+
+.zone h2 {
+    font-size: 19px;
+    margin-bottom: 5px;
+}
+
+.zone p {
+    color: #94a3b8;
+    margin-top: 5px;
+}
+
+.left-zone h2 {
+    color: #60a5fa;
+}
+
+.right-zone h2 {
+    color: #f472b6;
+}
+
+
+/* =========================================================
+   PARTÍCULAS
+========================================================= */
+
+.particles {
+    position: relative;
+    height: 220px;
+    margin-top: 10px;
+}
+
+.particle {
+    position: absolute;
+    border-radius: 50%;
+    transition:
+        left 1.2s ease,
+        top 1.2s ease,
+        opacity 1.2s ease,
+        transform 1.2s ease;
+}
+
+.co {
+    width: 20px;
+    height: 20px;
+
+    background: #60a5fa;
+
+    box-shadow:
+        0 0 12px rgba(96,165,250,0.8);
+}
+
+.hydrated {
+    width: 30px;
+    height: 30px;
+
+    background: #f472b6;
+
+    box-shadow:
+        0 0 15px rgba(244,114,182,0.8);
+}
+
+.water {
+    width: 12px;
+    height: 12px;
+
+    background: #38bdf8;
+
+    box-shadow:
+        0 0 10px rgba(56,189,248,0.8);
+}
+
+
+/* posições */
+
+.left-zone .p1 {
+    left: 25%;
+    top: 25%;
+}
+
+.left-zone .p2 {
+    left: 55%;
+    top: 40%;
+}
+
+.left-zone .p3 {
+    left: 35%;
+    top: 65%;
+}
+
+.left-zone .p4 {
+    left: 65%;
+    top: 70%;
+}
+
+.right-zone .p5 {
+    left: 30%;
+    top: 30%;
+}
+
+.right-zone .p6 {
+    left: 60%;
+    top: 50%;
+}
+
+.right-zone .p7 {
+    left: 45%;
+    top: 70%;
+}
+
+
+/* =========================================================
+   EQUILÍBRIO CENTRAL
+========================================================= */
+
+.central-equilibrium {
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    transform: translate(-50%, -50%);
+
+    text-align: center;
+
+    width: 210px;
+
+    z-index: 5;
+}
+
+.arrows {
+    font-size: 48px;
+    color: #fbbf24;
+    font-weight: bold;
+    line-height: 1;
+
+    transition: 0.5s;
+}
+
+.eq-label {
+    margin-top: 5px;
+    color: #cbd5e1;
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   CARTÃO INDICADOR
+========================================================= */
+
+.card-area {
+    position: absolute;
+
+    left: 50%;
+    bottom: 15px;
+
+    transform: translateX(-50%);
+
+    text-align: center;
+
+    z-index: 10;
+}
+
+.card {
+
+    width: 80px;
+    height: 50px;
+
+    border-radius: 8px;
+
+    border: 3px solid white;
+
+    /*
+       A transição é feita pelo background.
+       O cartão não "teleporta" de uma cor para outra.
+    */
+
+    background: rgb(236,72,153);
+
+    transition:
+        background 2.2s ease,
+        box-shadow 2.2s ease,
+        transform 0.6s ease;
+
+    box-shadow:
+        0 0 20px rgba(236,72,153,0.45);
+}
+
+.card.changing {
+    transform: scale(1.08);
+}
+
+.card-label {
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+
+/* =========================================================
+   CALOR
+========================================================= */
+
+.heat-icon {
+    position: absolute;
+
+    bottom: 70px;
+    left: -100px;
+
+    font-size: 55px;
+
+    opacity: 0;
+
+    z-index: 20;
+}
+
+.heat-icon.active {
+    animation: heatMove 1.5s ease forwards;
+}
+
+@keyframes heatMove {
+
+    0% {
+        left: -100px;
+        opacity: 0;
+    }
+
+    30% {
+        opacity: 1;
+    }
+
+    100% {
+        left: 50%;
+        transform: translateX(-50%);
+        opacity: 0;
+    }
+}
+
+
+/* =========================================================
+   ÁGUA
+========================================================= */
+
+.water-drop {
+    position: absolute;
+
+    top: -60px;
+    left: 50%;
+
+    font-size: 45px;
+
+    opacity: 0;
+
+    z-index: 20;
+}
+
+.water-drop.active {
+    animation: dropWater 1.4s ease forwards;
+}
+
+@keyframes dropWater {
+
+    0% {
+        top: -60px;
+        opacity: 0;
+    }
+
+    30% {
+        opacity: 1;
+    }
+
+    100% {
+        top: 120px;
+        opacity: 0;
+    }
+}
+
+
+/* =========================================================
+   DESLOCAMENTO
+========================================================= */
+
+.displacement {
+    margin-top: 25px;
+}
+
+.displacement-title {
+    text-align: center;
+    color: #cbd5e1;
+    margin-bottom: 10px;
+}
+
+.bar {
+    height: 25px;
+
+    border-radius: 20px;
+
+    overflow: hidden;
+
+    display: flex;
+
+    background: #334155;
+
+    position: relative;
+}
+
+.bar-left {
+    width: 50%;
+
+    background: #2563eb;
+
+    transition:
+        width 1.5s cubic-bezier(.4,0,.2,1);
+}
+
+.bar-right {
+    width: 50%;
+
+    background: #ec4899;
+
+    transition:
+        width 1.5s cubic-bezier(.4,0,.2,1);
+}
+
+.bar-label {
+    display: flex;
+
+    justify-content: space-between;
+
+    font-size: 12px;
+
+    margin-top: 5px;
+
+    color: #94a3b8;
+}
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.status {
+
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 15px;
+
+    margin-top: 25px;
+}
+
+.status-card {
+
+    background: rgba(0,0,0,0.2);
+
+    padding: 15px;
+
+    border-radius: 12px;
+
+    text-align: center;
+}
+
+.status-card .value {
+
+    font-size: 20px;
+
+    font-weight: bold;
+
+    margin-top: 5px;
+}
+
+.temperature {
+    color: #fbbf24;
+}
+
+.direction {
+    color: #60a5fa;
+}
+
+.color-status {
+    color: #f472b6;
+
+    transition:
+        color 2s ease;
+}
+
+
+/* =========================================================
+   EXPLICAÇÃO
+========================================================= */
+
+.explanation {
+
+    margin-top: 25px;
+
+    padding: 20px;
+
+    background: rgba(0,0,0,0.2);
+
+    border-radius: 15px;
+
+    line-height: 1.6;
+
+    min-height: 160px;
+}
+
+.explanation h3 {
+
+    margin-top: 0;
+
+    color: #fbbf24;
+}
+
+.highlight {
+
+    color: #60a5fa;
+
+    font-weight: bold;
+}
+
+
+/* =========================================================
+   BOTÕES
+========================================================= */
+
+.controls {
+    margin-top: 25px;
+}
+
+.controls h3 {
+    text-align: center;
+}
+
+.buttons {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(5, 1fr);
+
+    gap: 10px;
+}
+
+button {
+
+    border: none;
+
+    padding: 13px 8px;
+
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    background: #334155;
+
+    color: white;
+
+    font-weight: bold;
+
+    transition:
+        transform 0.25s,
+        background 0.25s;
+}
+
+button:hover {
+
+    transform: translateY(-2px);
+
+    background: #475569;
+}
+
+
+/* botão resposta */
+
+.answer-button {
+
+    width: 100%;
+
+    margin-top: 18px;
+
+    padding: 16px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #f59e0b,
+            #ea580c
+        );
+
+    font-size: 17px;
+
+    box-shadow:
+        0 8px 20px rgba(245,158,11,0.25);
+}
+
+.answer-button:hover {
+
+    background:
+        linear-gradient(
+            135deg,
+            #f97316,
+            #dc2626
+        );
+}
+
+
+/* reset */
+
+.reset {
+
+    margin-top: 15px;
+
+    width: 100%;
+
+    background: #7c3aed;
+}
+
+.result {
+
+    text-align: center;
+
+    margin-top: 15px;
+
+    font-size: 17px;
+
+    min-height: 25px;
+
+    color: #cbd5e1;
+}
+
+
+/* =========================================================
+   PÁGINA DA RESPOSTA
+========================================================= */
+
+.answer-page {
+
+    display: none;
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 1000;
+
+    overflow-y: auto;
+
+    background:
+        radial-gradient(
+            circle at top,
+            #27345c,
+            transparent 50%
+        ),
+        linear-gradient(
+            135deg,
+            #101525,
+            #1c2540,
+            #111827
+        );
+
+    padding: 40px 20px;
+}
+
+.answer-page.show {
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+}
+
+.answer-content {
+
+    width: 100%;
+
+    max-width: 800px;
+
+    background:
+        rgba(255,255,255,0.07);
+
+    border:
+        1px solid rgba(255,255,255,0.12);
+
+    border-radius: 25px;
+
+    padding: 40px;
+
+    text-align: center;
+
+    box-shadow:
+        0 25px 70px rgba(0,0,0,0.45);
+}
+
+.answer-icon {
+    font-size: 55px;
+}
+
+.answer-content h1 {
+    margin-bottom: 20px;
+}
+
+.correct-letter {
+
+    width: 90px;
+    height: 90px;
+
+    margin: 20px auto;
+
+    border-radius: 50%;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 50px;
+
+    font-weight: bold;
+
+    background: #16a34a;
+
+    box-shadow:
+        0 0 30px rgba(34,197,94,0.45);
+}
+
+.answer-content h2 {
+
+    color: #fbbf24;
+}
+
+.answer-reaction {
+
+    margin: 30px 0;
+
+    padding: 20px;
+
+    border-radius: 15px;
+
+    background: rgba(0,0,0,0.25);
+
+    font-size: 23px;
+
+    font-weight: bold;
+}
+
+.answer-explanation {
+
+    text-align: left;
+
+    line-height: 1.7;
+
+    padding: 20px;
+
+    background:
+        rgba(0,0,0,0.18);
+
+    border-radius: 15px;
+}
+
+.answer-explanation h3 {
+
+    color: #fbbf24;
+
+    margin-top: 0;
+}
+
+.visual-summary {
+
+    margin: 30px 0;
+
+    padding: 20px;
+
+    border-radius: 15px;
+
+    background:
+        rgba(255,255,255,0.05);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 15px;
+
+    flex-wrap: wrap;
+
+    font-size: 18px;
+
+    font-weight: bold;
+}
+
+.big-arrow {
+
+    font-size: 25px;
+
+    color: #fbbf24;
+}
+
+.back-button {
+
+    width: 100%;
+
+    margin-top: 10px;
+
+    background: #475569;
+
+    padding: 15px;
+}
+
+
+/* =========================================================
+   RESPONSIVO
+========================================================= */
+
+@media (max-width: 750px) {
+
+    .steps {
+
+        grid-template-columns:
+            1fr 1fr;
+    }
+
+    .environment {
+
+        height: 400px;
+    }
+
+    .status {
+
+        grid-template-columns:
+            1fr;
+    }
+
+    .buttons {
+
+        grid-template-columns:
+            1fr 1fr;
+    }
+
+    .question-reaction {
+
+        font-size: 18px;
+    }
+
+    .color-indicator {
+
+        gap: 20px;
+    }
+
+    .answer-content {
+
+        padding: 25px;
+    }
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     CABEÇALHO
+========================================================= -->
+
+<header>
+
+    <h1>
+        🧪 Equilíbrio Químico — Cartão de Cobalto
+    </h1>
+
+    <p>
+        Princípio de Le Chatelier na prática
+    </p>
+
+</header>
+
+
+<!-- =========================================================
+     ENUNCIADO DA QUESTÃO
+========================================================= -->
+
+<div class="question-box">
+
+    <div class="question-header">
+        📝 QUESTÃO — EQUILÍBRIO QUÍMICO
+    </div>
+
+    <div class="question-text">
+
+        <p>
+
+            Para garantir que produtos eletrônicos estejam armazenados
+            de forma adequada antes da venda, algumas empresas utilizam
+            cartões indicadores de umidade nas embalagens desses produtos.
+            Alguns desses cartões contêm um sal de cobalto que muda de cor
+            em presença de água, de acordo com a equação química:
+
+        </p>
+
+
+        <div class="question-reaction">
+
+            <span class="blue-text">
+                CoCl₂(s)
+            </span>
+
+            +
+
+            6 H₂O(g)
+
+            ⇌
+
+            <span class="pink-text">
+                CoCl₂·6H₂O(s)
+            </span>
+
+            <span class="energy-question">
+                ΔH &lt; 0
+            </span>
+
+        </div>
+
+
+        <div class="color-indicator">
+
+            <div class="color-side">
+
+                <div class="blue-square"></div>
+
+                <strong>
+                    AZUL
+                </strong>
+
+                <small>
+                    CoCl₂(s)
+                </small>
+
+            </div>
+
+
+            <div class="reaction-arrow">
+                ⇌
+            </div>
+
+
+            <div class="color-side">
+
+                <div class="pink-square"></div>
+
+                <strong>
+                    ROSA
+                </strong>
+
+                <small>
+                    CoCl₂·6H₂O(s)
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <p>
+
+            Como você procederia para reutilizar, num curto intervalo
+            de tempo, um cartão que já estivesse com a coloração rosa?
+
+        </p>
+
+
+        <div class="alternatives">
+
+            <div class="alternative">
+                <strong>A)</strong>
+                Resfriaria no congelador.
+            </div>
+
+            <div class="alternative">
+                <strong>B)</strong>
+                Borrifaria com spray de água.
+            </div>
+
+            <div class="alternative">
+                <strong>C)</strong>
+                Envolveria com papel alumínio.
+            </div>
+
+            <div class="alternative">
+                <strong>D)</strong>
+                Aqueceria com secador de cabelos.
+            </div>
+
+            <div class="alternative">
+                <strong>E)</strong>
+                Embrulharia em guardanapo de papel.
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     SIMULADOR
+========================================================= -->
+
+<div class="container">
+
+
+    <!-- ETAPAS -->
+
+    <div class="steps">
+
+        <div class="step active" id="step1">
+            1️⃣ Situação inicial
+        </div>
+
+        <div class="step" id="step2">
+            2️⃣ Perturbação
+        </div>
+
+        <div class="step" id="step3">
+            3️⃣ Resposta do sistema
+        </div>
+
+        <div class="step" id="step4">
+            4️⃣ Novo equilíbrio
+        </div>
+
+    </div>
+
+
+
+    <div class="simulator">
+
+
+        <!-- =================================================
+             AMBIENTE
+        ================================================== -->
+
+        <div class="environment">
+
+
+            <!-- CALOR -->
+
+            <div
+                class="heat-icon"
+                id="heatIcon"
+            >
+                🔥
+            </div>
+
+
+            <!-- ÁGUA -->
+
+            <div
+                class="water-drop"
+                id="waterDrop"
+            >
+                💧
+            </div>
+
+
+
+            <!-- =============================================
+                 ESQUERDA — AZUL
+            ============================================== -->
+
+            <div class="zone left-zone">
+
+                <h2>
+                    AZUL
+                </h2>
+
+                <p>
+                    CoCl₂(s)
+                </p>
+
+
+                <div class="particles">
+
+                    <div class="particle co p1"></div>
+
+                    <div class="particle co p2"></div>
+
+                    <div class="particle co p3"></div>
+
+                    <div class="particle co p4"></div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =============================================
+                 CENTRO
+            ============================================== -->
+
+            <div class="central-equilibrium">
+
+                <div
+                    class="arrows"
+                    id="arrows"
+                >
+                    ⇌
+                </div>
+
+                <div class="eq-label">
+                    Equilíbrio químico
+                </div>
+
+            </div>
+
+
+
+            <!-- =============================================
+                 DIREITA — ROSA
+            ============================================== -->
+
+            <div class="zone right-zone">
+
+                <h2>
+                    ROSA
+                </h2>
+
+                <p>
+                    CoCl₂·6H₂O(s)
+                </p>
+
+
+                <div class="particles">
+
+                    <div class="particle hydrated p5"></div>
+
+                    <div class="particle hydrated p6"></div>
+
+                    <div class="particle hydrated p7"></div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- =============================================
+                 CARTÃO
+            ============================================== -->
+
+            <div class="card-area">
+
+                <div
+                    class="card"
+                    id="card"
+                >
+                </div>
+
+                <div class="card-label">
+                    Cartão indicador
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             BARRA DE DESLOCAMENTO
+        ================================================== -->
+
+        <div class="displacement">
+
+            <div class="displacement-title">
+
+                ⚖️ Deslocamento do equilíbrio
+
+            </div>
+
+
+            <div class="bar">
+
+                <div
+                    class="bar-left"
+                    id="barLeft"
+                ></div>
+
+                <div
+                    class="bar-right"
+                    id="barRight"
+                ></div>
+
+            </div>
+
+
+            <div class="bar-label">
+
+                <span>
+                    ← ESQUERDA: AZUL
+                </span>
+
+                <span>
+                    DIREITA: ROSA →
+                </span>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             STATUS
+        ================================================== -->
+
+        <div class="status">
+
+
+            <div class="status-card">
+
+                🌡️ Temperatura
+
+                <div
+                    class="value temperature"
+                    id="temperature"
+                >
+                    Normal
+                </div>
+
+            </div>
+
+
+            <div class="status-card">
+
+                ⚖️ Deslocamento
+
+                <div
+                    class="value direction"
+                    id="direction"
+                >
+                    Equilíbrio
+                </div>
+
+            </div>
+
+
+            <div class="status-card">
+
+                🎨 Cor do cartão
+
+                <div
+                    class="value color-status"
+                    id="colorStatus"
+                >
+                    Rosa
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             EXPLICAÇÃO DINÂMICA
+        ================================================== -->
+
+        <div
+            class="explanation"
+            id="explanation"
+        >
+
+            <h3>
+                🔎 Situação inicial
+            </h3>
+
+            <p>
+
+                O sistema está em equilíbrio entre o
+                <span class="highlight">
+                    CoCl₂(s)
+                </span>,
+                de cor azul, e o
+                <span class="highlight">
+                    CoCl₂·6H₂O(s)
+                </span>,
+                de cor rosa.
+
+            </p>
+
+            <p>
+
+                Como o cartão está rosa, há predominância
+                da forma hidratada.
+
+            </p>
+
+        </div>
+
+
+
+        <!-- =================================================
+             CONTROLES
+        ================================================== -->
+
+        <div class="controls">
+
+            <h3>
+                🎯 Escolha uma alternativa e observe o sistema
+            </h3>
+
+
+            <div class="buttons">
+
+                <button onclick="cool()">
+                    A) ❄️ Resfriar
+                </button>
+
+                <button onclick="addWater()">
+                    B) 💧 Adicionar água
+                </button>
+
+                <button onclick="foil()">
+                    C) 🪙 Papel alumínio
+                </button>
+
+                <button onclick="heat()">
+                    D) 🔥 Aquecer
+                </button>
+
+                <button onclick="paper()">
+                    E) 🧻 Guardanapo
+                </button>
+
+            </div>
+
+
+            <!-- BOTÃO QUE REVELA A RESPOSTA -->
+
+            <button
+                class="answer-button"
+                onclick="showAnswer()"
+            >
+                👁️ Visualizar resposta correta
+            </button>
+
+
+            <button
+                class="reset"
+                onclick="resetVisual()"
+            >
+                🔄 Reiniciar simulador
+            </button>
+
+
+            <div
+                class="result"
+                id="result"
+            ></div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     TELA SEPARADA DA RESPOSTA
+========================================================= -->
+
+<div
+    class="answer-page"
+    id="answerPage"
+>
+
+    <div class="answer-content">
+
+
+        <div class="answer-icon">
+            🎯
+        </div>
+
+
+        <h1>
+            Resposta da questão
+        </h1>
+
+
+        <div class="correct-letter">
+            D
+        </div>
+
+
+        <h2>
+            Aqueceria com secador de cabelos.
+        </h2>
+
+
+        <div class="answer-reaction">
+
+            CoCl₂(s) + 6 H₂O(g)
+            ⇌
+            CoCl₂·6H₂O(s) + 🔥
+
+        </div>
+
+
+        <div class="answer-explanation">
+
+            <h3>
+                🔎 Por quê?
+            </h3>
+
+
+            <p>
+
+                A reação direta apresenta
+                <strong>
+                    ΔH &lt; 0
+                </strong>,
+                portanto é uma reação
+                <strong>
+                    exotérmica
+                </strong>.
+
+            </p>
+
+
+            <p>
+
+                Quando aquecemos o sistema, estamos
+                <strong>
+                    adicionando calor
+                </strong>.
+
+            </p>
+
+
+            <p>
+
+                Pelo
+                <strong>
+                    Princípio de Le Chatelier
+                </strong>,
+                o sistema reage à perturbação tentando
+                diminuir o efeito causado.
+
+            </p>
+
+
+            <p>
+
+                Como o calor foi adicionado, o equilíbrio
+                se desloca para o sentido que
+                <strong>
+                    consome o calor
+                </strong>.
+
+            </p>
+
+
+            <p>
+
+                Portanto, o equilíbrio se desloca para a
+                <strong>
+                    esquerda
+                </strong>,
+                favorecendo a formação de
+                <strong>
+                    CoCl₂(s)
+                </strong>,
+                que apresenta coloração
+                <strong>
+                    azul
+                </strong>.
+
+            </p>
+
+        </div>
+
+
+        <div class="visual-summary">
+
+            <div>
+                🌸 ROSA
+            </div>
+
+            <div class="big-arrow">
+                🔥 →
+            </div>
+
+            <div>
+                ⬅️ ESQUERDA
+            </div>
+
+            <div class="big-arrow">
+                →
+            </div>
+
+            <div>
+                🔵 AZUL
+            </div>
+
+        </div>
+
+
+        <button
+            class="back-button"
+            onclick="hideAnswer()"
+        >
+            ← Voltar ao simulador
+        </button>
+
+    </div>
+
+</div>
+
+
+
+<script>
+
+/* =========================================================
+   ELEMENTOS
+========================================================= */
+
+const card =
+    document.getElementById("card");
+
+const temperature =
+    document.getElementById("temperature");
+
+const direction =
+    document.getElementById("direction");
+
+const colorStatus =
+    document.getElementById("colorStatus");
+
+const explanation =
+    document.getElementById("explanation");
+
+const barLeft =
+    document.getElementById("barLeft");
+
+const barRight =
+    document.getElementById("barRight");
+
+const heatIcon =
+    document.getElementById("heatIcon");
+
+const waterDrop =
+    document.getElementById("waterDrop");
+
+const result =
+    document.getElementById("result");
+
+const arrows =
+    document.getElementById("arrows");
+
+const steps = [
+
+    document.getElementById("step1"),
+
+    document.getElementById("step2"),
+
+    document.getElementById("step3"),
+
+    document.getElementById("step4")
+
+];
+
+
+
+/* =========================================================
+   ETAPAS
+========================================================= */
+
+function setStep(number) {
+
+    steps.forEach((step, index) => {
+
+        step.classList.toggle(
+            "active",
+            index < number
+        );
+
+    });
+
+}
+
+
+
+/* =========================================================
+   TRANSIÇÃO DE COR
+========================================================= */
+
+/*
+   Em vez de simplesmente colocar:
+
+   card.style.background = "blue"
+
+   fazemos uma transição RGB gradual.
+
+   Rosa:
+   rgb(236,72,153)
+
+   Azul:
+   rgb(37,99,235)
+*/
+
+function changeCardColor(targetColor) {
+
+    let startColor;
+
+    if (targetColor === "blue") {
+
+        startColor = {
+            r: 236,
+            g: 72,
+            b: 153
+        };
+
+    } else {
+
+        startColor = {
+            r: 37,
+            g: 99,
+            b: 235
+        };
+
+    }
+
+
+    let endColor;
+
+    if (targetColor === "blue") {
+
+        endColor = {
+            r: 37,
+            g: 99,
+            b: 235
+        };
+
+    } else {
+
+        endColor = {
+            r: 236,
+            g: 72,
+            b: 153
+        };
+
+    }
+
+
+    card.classList.add("changing");
+
+
+    const duration = 2200;
+
+    const startTime = performance.now();
+
+
+    function animateColor(currentTime) {
+
+        const elapsed =
+            currentTime - startTime;
+
+        let progress =
+            Math.min(
+                elapsed / duration,
+                1
+            );
+
+
+        /*
+           Ease-in-out
+           deixa a transição mais natural.
+        */
+
+        progress =
+            progress < 0.5
+            ? 2 * progress * progress
+            : 1 - Math.pow(
+                -2 * progress + 2,
+                2
+            ) / 2;
+
+
+        const r =
+            Math.round(
+                startColor.r +
+                (endColor.r - startColor.r)
+                * progress
+            );
+
+        const g =
+            Math.round(
+                startColor.g +
+                (endColor.g - startColor.g)
+                * progress
+            );
+
+        const b =
+            Math.round(
+                startColor.b +
+                (endColor.b - startColor.b)
+                * progress
+            );
+
+
+        card.style.background =
+            `rgb(${r}, ${g}, ${b})`;
+
+
+        /*
+           Também muda suavemente o brilho.
+        */
+
+        card.style.boxShadow =
+            `0 0 25px rgba(${r}, ${g}, ${b}, 0.55)`;
+
+
+        if (progress < 1) {
+
+            requestAnimationFrame(
+                animateColor
+            );
+
+        } else {
+
+            card.classList.remove(
+                "changing"
+            );
+
+        }
+
+    }
+
+
+    requestAnimationFrame(
+        animateColor
+    );
+
+
+    /*
+       Texto também acompanha a mudança.
+    */
+
+    if (targetColor === "blue") {
+
+        colorStatus.textContent =
+            "Mudando para azul...";
+
+        colorStatus.style.color =
+            "#60a5fa";
+
+
+        setTimeout(() => {
+
+            colorStatus.textContent =
+                "Azul";
+
+        }, 2200);
+
+    } else {
+
+        colorStatus.textContent =
+            "Mudando para rosa...";
+
+        colorStatus.style.color =
+            "#f472b6";
+
+
+        setTimeout(() => {
+
+            colorStatus.textContent =
+                "Rosa";
+
+        }, 2200);
+
+    }
+
+}
+
+
+
+/* =========================================================
+   DESLOCAMENTO PARA ESQUERDA
+========================================================= */
+
+function shiftLeft() {
+
+    barLeft.style.width =
+        "75%";
+
+    barRight.style.width =
+        "25%";
+
+
+    direction.textContent =
+        "← Esquerda";
+
+    direction.style.color =
+        "#60a5fa";
+
+
+    arrows.textContent =
+        "⇐";
+
+}
+
+
+
+/* =========================================================
+   DESLOCAMENTO PARA DIREITA
+========================================================= */
+
+function shiftRight() {
+
+    barLeft.style.width =
+        "25%";
+
+    barRight.style.width =
+        "75%";
+
+
+    direction.textContent =
+        "Direita →";
+
+    direction.style.color =
+        "#f472b6";
+
+
+    arrows.textContent =
+        "⇒";
+
+}
+
+
+
+/* =========================================================
+   ALTERNATIVA A — RESFRIAR
+========================================================= */
+
+function cool() {
+
+    setStep(4);
+
+
+    temperature.textContent =
+        "Baixa ❄️";
+
+    temperature.style.color =
+        "#60a5fa";
+
+
+    shiftRight();
+
+
+    changeCardColor("pink");
+
+
+    result.innerHTML =
+        "Observe a direção do deslocamento e a mudança da cor do cartão.";
+
+
+    explanation.innerHTML = `
+
+        <h3>
+            ❄️ O sistema foi resfriado
+        </h3>
+
+        <p>
+
+            A reação direta é
+            <strong>
+                exotérmica
+            </strong>
+            (ΔH &lt; 0).
+
+        </p>
+
+        <p>
+
+            Ao retirar calor, o sistema favorece o
+            sentido que
+            <strong>
+                produz calor
+            </strong>.
+
+        </p>
+
+        <p>
+
+            O equilíbrio se desloca para a
+            <strong>
+                direita
+            </strong>,
+            favorecendo a formação de
+            CoCl₂·6H₂O.
+
+        </p>
+
+        <p>
+            Observe que o cartão permanece/favorece a
+            coloração <strong>rosa</strong>.
+        </p>
+
+    `;
+
+}
+
+
+
+/* =========================================================
+   ALTERNATIVA B — ÁGUA
+========================================================= */
+
+function addWater() {
+
+    setStep(4);
+
+
+    waterDrop.classList.remove(
+        "active"
+    );
+
+
+    void waterDrop.offsetWidth;
+
+
+    waterDrop.classList.add(
+        "active"
+    );
+
+
+    temperature.textContent =
+        "Normal";
+
+
+    shiftRight();
+
+
+    changeCardColor("pink");
+
+
+    result.innerHTML =
+        "Observe a direção do deslocamento e a mudança da cor do cartão.";
+
+
+    explanation.innerHTML = `
+
+        <h3>
+            💧 Foi adicionada água
+        </h3>
+
+        <p>
+
+            A água participa diretamente da reação:
+
+        </p>
+
+        <p
+            style="
+                text-align:center;
+                font-size:20px;
+            "
+        >
+
+            CoCl₂ + 6 H₂O
+            ⇌
+            CoCl₂·6H₂O
+
+        </p>
+
+        <p>
+
+            Ao adicionar H₂O, o sistema tende a
+            <strong>
+                consumir a água adicionada
+            </strong>.
+
+        </p>
+
+        <p>
+
+            O equilíbrio se desloca para a
+            <strong>
+                direita
+            </strong>,
+            favorecendo a forma
+            <strong>
+                rosa
+            </strong>.
+
+        </p>
+
+    `;
+
+}
+
+
+
+/* =========================================================
+   ALTERNATIVA C — PAPEL ALUMÍNIO
+========================================================= */
+
+function foil() {
+
+    setStep(4);
+
+
+    temperature.textContent =
+        "Normal";
+
+
+    direction.textContent =
+        "Sem deslocamento";
+
+
+    direction.style.color =
+        "#cbd5e1";
+
+
+    arrows.textContent =
+        "⇌";
+
+
+    barLeft.style.width =
+        "50%";
+
+
+    barRight.style.width =
+        "50%";
+
+
+    changeCardColor("pink");
+
+
+    result.innerHTML =
+        "Observe o que acontece quando não há uma perturbação significativa no equilíbrio.";
+
+
+    explanation.innerHTML = `
+
+        <h3>
+            🪙 Papel alumínio
+        </h3>
+
+        <p>
+
+            Envolver o cartão com papel alumínio
+            não altera diretamente a temperatura
+            nem a concentração das espécies do equilíbrio.
+
+        </p>
+
+        <p>
+
+            Portanto, não ocorre um deslocamento
+            significativo do equilíbrio químico.
+
+        </p>
+
+        <p>
+
+            O sistema permanece próximo da situação
+            inicial e o cartão continua
+            <strong>
+                rosa
+            </strong>.
+
+        </p>
+
+    `;
+
+}
+
+
+
+/* =========================================================
+   ALTERNATIVA D — AQUECER
+========================================================= */
+
+function heat() {
+
+    setStep(2);
+
+
+    temperature.textContent =
+        "Alta 🔥";
+
+    temperature.style.color =
+        "#f97316";
+
+
+    result.innerHTML =
+        "O sistema recebeu calor. Observe cuidadosamente o que acontece a seguir.";
+
+
+    explanation.innerHTML = `
+
+        <h3>
+            🔥 Perturbação: aumento da temperatura
+        </h3>
+
+        <p>
+
+            O sistema recebeu
+            <strong>
+                calor
+            </strong>.
+
+        </p>
+
+        <p>
+
+            Agora observe para qual lado o equilíbrio
+            irá se deslocar.
+
+        </p>
+
+    `;
+
+
+    heatIcon.classList.remove(
+        "active"
+    );
+
+
+    void heatIcon.offsetWidth;
+
+
+    heatIcon.classList.add(
+        "active"
+    );
+
+
+    /*
+       Primeiro mostramos a perturbação.
+    */
+
+    setTimeout(() => {
+
+        setStep(3);
+
+
+        explanation.innerHTML = `
+
+            <h3>
+                ⚖️ Resposta do sistema
+            </h3>
+
+            <p>
+
+                O sistema reage à adição de calor
+                deslocando o equilíbrio no sentido
+                que tende a
+                <strong>
+                    consumir o calor
+                </strong>.
+
+            </p>
+
+            <p>
+
+                Observe a barra de deslocamento,
+                as setas e a mudança gradual
+                da cor do cartão.
+
+            </p>
+
+        `;
+
+
+        shiftLeft();
+
+
+    }, 900);
+
+
+    /*
+       Depois mostramos o novo equilíbrio.
+    */
+
+    setTimeout(() => {
+
+        setStep(4);
+
+
+        changeCardColor("blue");
+
+
+        explanation.innerHTML = `
+
+            <h3>
+                🔵 Novo equilíbrio
+            </h3>
+
+            <p>
+
+                O equilíbrio deslocou-se para a
+                <strong>
+                    esquerda
+                </strong>.
+
+            </p>
+
+            <p>
+
+                Com isso, aumenta a quantidade de
+                <strong>
+                    CoCl₂(s)
+                </strong>,
+                associado à coloração
+                <strong>
+                    azul
+                </strong>.
+
+            </p>
+
+            <p
+                style="
+                    text-align:center;
+                    font-size:22px;
+                    font-weight:bold;
+                    color:#fbbf24;
+                "
+            >
+
+                ROSA
+                →
+                🔥
+                →
+                ESQUERDA
+                →
+                AZUL
+
+            </p>
+
+        `;
+
+
+        result.innerHTML =
+            "Observe a mudança gradual de rosa para azul.";
+
+    }, 2300);
+
+}
+
+
+
+/* =========================================================
+   ALTERNATIVA E — GUARDANAPO
+========================================================= */
+
+function paper() {
+
+    setStep(4);
+
+
+    temperature.textContent =
+        "Normal";
+
+
+    shiftLeft();
+
+
+    changeCardColor("blue");
+
+
+    result.innerHTML =
+        "Observe a direção do deslocamento e a mudança da cor do cartão.";
+
+
+    explanation.innerHTML = `
+
+        <h3>
+            🧻 Remoção de umidade
+        </h3>
+
+        <p>
+
+            A remoção de água favorece o sentido
+            que tende a
+            <strong>
+                produzir água
+            </strong>.
+
+        </p>
+
+        <p>
+
+            Dessa maneira, o equilíbrio pode se
+            deslocar para a
+            <strong>
+                esquerda
+            </strong>.
+
+        </p>
+
+        <p>
+
+            Observe a formação da espécie associada
+            à coloração
+            <strong>
+                azul
+            </strong>.
+
+        </p>
+
+    `;
+
+}
+
+
+
+/* =========================================================
+   MOSTRAR RESPOSTA
+========================================================= */
+
+function showAnswer() {
+
+    document
+        .getElementById("answerPage")
+        .classList.add("show");
+
+}
+
+
+
+/* =========================================================
+   ESCONDER RESPOSTA
+========================================================= */
+
+function hideAnswer() {
+
+    document
+        .getElementById("answerPage")
+        .classList.remove("show");
+
+}
+
+
+
+/* =========================================================
+   RESET
+========================================================= */
+
+function resetVisual() {
+
+    setStep(1);
+
+
+    temperature.textContent =
+        "Normal";
+
+    temperature.style.color =
+        "#fbbf24";
+
+
+    direction.textContent =
+        "Equilíbrio";
+
+    direction.style.color =
+        "#60a5fa";
+
+
+    colorStatus.textContent =
+        "Rosa";
+
+    colorStatus.style.color =
+        "#f472b6";
+
+
+    barLeft.style.width =
+        "50%";
+
+    barRight.style.width =
+        "50%";
+
+
+    arrows.textContent =
+        "⇌";
+
+
+    /*
+       Volta gradualmente para rosa.
+    */
+
+    changeCardColor("pink");
+
+
+    result.innerHTML =
+        "";
+
+
+    explanation.innerHTML = `
+
+        <h3>
+            🔎 Situação inicial
+        </h3>
+
+        <p>
+
+            O sistema está em equilíbrio entre o
+            <span class="highlight">
+                CoCl₂(s)
+            </span>,
+            de cor azul, e o
+            <span class="highlight">
+                CoCl₂·6H₂O(s)
+            </span>,
+            de cor rosa.
+
+        </p>
+
+        <p>
+
+            Como o cartão está rosa, há predominância
+            da forma hidratada.
+
+        </p>
+
+    `;
+
+
+    heatIcon.classList.remove(
+        "active"
+    );
+
+
+    waterDrop.classList.remove(
+        "active"
+    );
+
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador — Mal das Alturas e o Equilíbrio da Hemoglobina</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg-base:#04060a;
+  --bg-panel:#0c1119;
+  --bg-panel-2:#111826;
+  --bg-raised:#161f2e;
+  --line:rgba(148,163,184,0.14);
+  --line-strong:rgba(148,163,184,0.28);
+  --cyan:#4dd8f0;
+  --cyan-dim:rgba(77,216,240,0.14);
+  --rose:#fb7c93;
+  --rose-dim:rgba(251,124,147,0.14);
+  --amber:#f5b942;
+  --amber-dim:rgba(245,185,66,0.16);
+  --green:#3ddc9b;
+  --green-dim:rgba(61,220,155,0.14);
+  --ice:#7dd3fc;
+  --text:#eaeef4;
+  --text-dim:#93a0b4;
+  --text-faint:#5a6579;
+  --r-lg:22px;
+  --r-md:14px;
+  --font-d:'Space Grotesk',sans-serif;
+  --font-b:'Inter',sans-serif;
+  --font-m:'JetBrains Mono',monospace;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+
+body{
+  font-family:var(--font-b);
+  background:
+    radial-gradient(circle at 18% -8%, rgba(77,216,240,0.10), transparent 42%),
+    radial-gradient(circle at 82% 108%, rgba(251,124,147,0.08), transparent 45%),
+    var(--bg-base);
+  color:var(--text);
+  min-height:100vh;
+  padding:32px 18px 60px;
+  position:relative;
+  overflow-x:hidden;
+}
+
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  opacity:0.5;
+  background-image:
+    radial-gradient(circle at 50% 18%, transparent 0, transparent 118px, rgba(148,163,184,0.05) 120px, transparent 122px),
+    radial-gradient(circle at 50% 18%, transparent 0, transparent 178px, rgba(148,163,184,0.045) 180px, transparent 182px),
+    radial-gradient(circle at 50% 18%, transparent 0, transparent 248px, rgba(148,163,184,0.035) 250px, transparent 252px),
+    radial-gradient(circle at 50% 18%, transparent 0, transparent 328px, rgba(148,163,184,0.028) 330px, transparent 332px);
+  background-repeat:no-repeat;
+  background-position:center -60px;
+}
+
+.app-shell{max-width:1180px;margin:0 auto;position:relative;z-index:1;}
+
+/* ===== ENUNCIADO ===== */
+.painel-enunciado{
+  background:linear-gradient(180deg, var(--bg-panel-2), var(--bg-panel));
+  border:1px solid var(--line);
+  border-radius:var(--r-lg);
+  padding:30px 32px;
+  margin-bottom:22px;
+  position:relative;
+  overflow:hidden;
+}
+.painel-enunciado::after{
+  content:"";
+  position:absolute;top:-40%;right:-10%;
+  width:280px;height:280px;
+  background:radial-gradient(circle, rgba(77,216,240,0.14), transparent 70%);
+  pointer-events:none;
+}
+.eyebrow-cena{font-family:var(--font-d);font-size:13px;font-weight:600;color:var(--cyan);margin-bottom:10px;}
+.titulo-enunciado{font-family:var(--font-d);font-size:26px;font-weight:700;line-height:1.35;max-width:640px;margin-bottom:16px;}
+.contexto-enunciado{font-size:15px;line-height:1.6;color:var(--text-dim);max-width:620px;margin-bottom:20px;}
+.equacao-mestra{
+  display:inline-flex;align-items:center;gap:10px;
+  background:var(--bg-raised);border:1px solid var(--line-strong);border-radius:12px;
+  padding:12px 18px;font-family:var(--font-d);font-size:19px;font-weight:600;
+}
+.equacao-mestra .esp-cy{color:var(--cyan);}
+.equacao-mestra .esp-ro{color:var(--rose);}
+.progresso-linha{display:flex;align-items:center;gap:10px;margin-top:20px;font-size:13px;color:var(--text-faint);}
+.progresso-trilha{flex:1;max-width:220px;height:5px;background:var(--bg-raised);border-radius:4px;overflow:hidden;}
+.progresso-preenchimento{height:100%;width:0%;background:linear-gradient(90deg, var(--cyan), var(--rose));transition:width 0.5s ease;}
+
+/* ===== GRID ===== */
+.grid-principal{display:grid;grid-template-columns:1fr;grid-template-areas:"camara" "lista";gap:20px;}
+@media (min-width:920px){
+  .grid-principal{grid-template-columns:380px 1fr;grid-template-areas:"lista camara";align-items:start;}
+}
+
+/* ===== LISTA ===== */
+.lista-alternativas{grid-area:lista;display:flex;flex-direction:column;gap:12px;}
+.titulo-secao{font-family:var(--font-d);font-size:13px;font-weight:600;color:var(--text-faint);padding-left:2px;}
+.card-alt{
+  background:var(--bg-panel);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:15px 16px;cursor:pointer;display:flex;align-items:flex-start;gap:13px;
+  transition:border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;position:relative;
+}
+.card-alt:hover{border-color:var(--line-strong);transform:translateX(2px);}
+.card-alt.explorando{border-color:var(--cyan);background:var(--cyan-dim);}
+.card-alt.marcada{border-color:var(--amber);box-shadow:0 0 0 1px var(--amber), 0 0 22px -6px var(--amber-dim);}
+.card-alt.veredito-correta{border-color:var(--green);background:var(--green-dim);box-shadow:0 0 0 1px var(--green);}
+.card-alt.veredito-errada{border-color:var(--rose);background:var(--rose-dim);box-shadow:0 0 0 1px var(--rose);}
+.badge-letra{
+  width:30px;height:30px;border-radius:50%;background:var(--bg-raised);border:1px solid var(--line-strong);
+  display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-weight:700;font-size:13px;
+  color:var(--text-dim);flex-shrink:0;transition:all 0.2s ease;
+}
+.card-alt.explorada .badge-letra{background:var(--cyan-dim);border-color:var(--cyan);color:var(--cyan);}
+.card-alt.marcada .badge-letra{background:var(--amber-dim);border-color:var(--amber);color:var(--amber);}
+.card-alt.veredito-correta .badge-letra{background:var(--green-dim);border-color:var(--green);color:var(--green);}
+.card-alt.veredito-errada .badge-letra{background:var(--rose-dim);border-color:var(--rose);color:var(--rose);}
+.corpo-alt{flex:1;min-width:0;}
+.texto-alt{font-size:14.5px;font-weight:500;color:var(--text);line-height:1.45;}
+.rodape-alt{display:flex;align-items:center;gap:10px;margin-top:9px;}
+.tag-explorada{font-size:11.5px;color:var(--cyan);display:none;align-items:center;gap:4px;}
+.card-alt.explorada .tag-explorada{display:inline-flex;}
+.btn-marcar{
+  font-family:var(--font-b);font-size:12px;font-weight:600;color:var(--text-faint);background:transparent;
+  border:1px solid var(--line-strong);border-radius:999px;padding:5px 11px;cursor:not-allowed;
+  transition:all 0.2s ease;opacity:0.45;
+}
+.card-alt.explorada .btn-marcar{cursor:pointer;opacity:1;color:var(--text-dim);}
+.card-alt.explorada .btn-marcar:hover{border-color:var(--amber);color:var(--amber);}
+.card-alt.marcada .btn-marcar{border-color:var(--amber);color:var(--amber);background:var(--amber-dim);}
+
+/* ===== CAMARA ===== */
+.camara{
+  grid-area:camara;background:linear-gradient(180deg, var(--bg-panel-2), var(--bg-panel));
+  border:1px solid var(--line);border-radius:var(--r-lg);padding:26px;
+  display:flex;flex-direction:column;min-height:560px;
+}
+.camara-cabecalho{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;gap:12px;flex-wrap:wrap;}
+.camara-titulo{font-family:var(--font-d);font-size:16px;font-weight:600;}
+.chip-hipotese{font-size:12px;font-weight:600;color:var(--text-dim);background:var(--bg-raised);border:1px solid var(--line);border-radius:999px;padding:5px 12px;white-space:nowrap;}
+
+.placeholder-camara{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;color:var(--text-faint);padding:40px 20px;}
+.placeholder-camara .icone-grande{font-size:38px;opacity:0.6;}
+.placeholder-camara p{font-size:14px;max-width:300px;line-height:1.5;}
+
+/* --- painel do instrumento --- */
+.painel-instrumento{
+  background:var(--bg-base);border:1px solid var(--line);border-radius:16px;
+  padding:20px 22px;min-height:230px;display:flex;flex-direction:column;gap:14px;
+}
+.instrumento-cabecalho{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.instrumento-titulo{font-size:12.5px;font-weight:600;color:var(--text-faint);padding-top:4px;}
+.valor-coluna{display:flex;flex-direction:column;align-items:flex-end;gap:3px;}
+.instrumento-valor{font-family:var(--font-m);font-size:24px;font-weight:700;color:var(--text);}
+.instrumento-valor small{font-family:var(--font-b);font-size:13px;color:var(--text-dim);font-weight:500;}
+.legenda-valor{font-size:11.5px;font-weight:600;color:var(--text-dim);background:var(--bg-raised);border:1px solid var(--line);border-radius:999px;padding:3px 10px;white-space:nowrap;}
+.instrumento-visual{flex:1;display:flex;align-items:center;justify-content:center;gap:26px;flex-wrap:wrap;}
+
+/* gauge semicircular (A e D) */
+.gauge-wrap{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;}
+.svg-gauge{width:190px;height:118px;overflow:visible;}
+
+/* pulso arterial (A) */
+.pulso-vaso-mini{width:150px;}
+.veia-mini{height:34px;background:var(--bg-raised);border:1px solid var(--line-strong);border-radius:10px;position:relative;overflow:hidden;display:flex;align-items:center;padding:0 8px;}
+.onda-pulso{width:100%;height:2px;background:var(--rose);position:relative;border-radius:2px;}
+.onda-pulso::before{
+  content:"";position:absolute;left:0;top:50%;width:10px;height:10px;margin-top:-5px;
+  background:var(--rose);border-radius:50%;box-shadow:0 0 10px var(--rose);
+  animation:deslocaPulso 1.4s linear infinite;
+}
+.onda-pulso.acelerado::before{animation-duration:0.6s;}
+@keyframes deslocaPulso{0%{left:0;}100%{left:calc(100% - 10px);}}
+
+/* termometros (B e C) */
+.termometro-wrap{display:flex;flex-direction:column;align-items:center;gap:0;}
+.term-tubo{width:26px;height:130px;border:3px solid var(--line-strong);border-bottom:none;border-radius:14px 14px 0 0;background:var(--bg-panel);position:relative;overflow:hidden;display:flex;align-items:flex-end;}
+.term-liquido{width:100%;background:linear-gradient(180deg, var(--amber), #f97316);transition:height 1.5s cubic-bezier(.3,.9,.4,1);}
+.term-liquido.term-liquido-frio{background:linear-gradient(180deg, var(--ice), #38bdf8);}
+.term-bulbo{width:46px;height:46px;border-radius:50%;border:3px solid var(--line-strong);background:var(--bg-panel);margin-top:-3px;display:flex;align-items:center;justify-content:center;}
+.term-bulbo-liquido{width:32px;height:32px;border-radius:50%;background:radial-gradient(circle at 35% 30%, #fbbf6a, #f97316);}
+.term-bulbo-liquido.bulbo-frio{background:radial-gradient(circle at 35% 30%, #a5e8ff, #38bdf8);}
+
+.icone-corpo-glow{
+  font-size:34px;padding:14px;border-radius:50%;background:var(--bg-raised);border:1px solid var(--line-strong);
+  transition:box-shadow 1.3s ease, border-color 1.3s ease;
+}
+.icone-corpo-glow.ativo{box-shadow:0 0 26px 4px rgba(249,115,22,0.45);border-color:#f97316;}
+
+.neve-wrap{position:relative;width:70px;height:130px;}
+.floco{position:absolute;top:-14px;font-size:15px;color:var(--ice);opacity:0.9;animation:cair 2.6s linear infinite;}
+@keyframes cair{
+  0%{transform:translateY(0) rotate(0deg);opacity:0.9;}
+  100%{transform:translateY(150px) rotate(160deg);opacity:0.15;}
+}
+
+/* painel D: altimetro + barra pO2 */
+.painel-D{display:flex;align-items:flex-start;justify-content:center;gap:34px;flex-wrap:wrap;}
+.montanha-silhueta{
+  width:120px;height:34px;margin-top:-6px;
+  clip-path:polygon(0% 100%, 22% 30%, 40% 62%, 58% 12%, 78% 55%, 100% 100%);
+  background:linear-gradient(180deg, #1c2b3d, #0c1119);
+  transition:transform 1.6s cubic-bezier(.2,.9,.3,1);
+  transform:translateY(0px);
+}
+.montanha-silhueta.subiu{transform:translateY(-9px) scaleY(1.12);}
+
+.barra-o2-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;}
+.barra-o2-label{font-size:12px;color:var(--text-faint);font-weight:600;}
+.barra-o2-container{
+  width:44px;height:130px;border-radius:10px;border:2px solid var(--line-strong);
+  background:linear-gradient(180deg, var(--green) 0%, var(--amber) 55%, var(--rose) 100%);
+  position:relative;overflow:hidden;
+}
+.barra-o2-overlay{position:absolute;top:0;left:0;right:0;height:0%;background:var(--bg-base);transition:height 1.5s cubic-bezier(.3,.9,.4,1);}
+.barra-o2-valor{font-family:var(--font-m);font-weight:700;font-size:15px;}
+
+/* painel E: odometro + hemacias, dividido em dois blocos */
+.painel-E-grid{display:flex;gap:30px;flex-wrap:wrap;justify-content:center;align-items:flex-start;}
+.bloco-e{display:flex;flex-direction:column;align-items:center;gap:9px;max-width:160px;text-align:center;}
+.odometro{
+  font-family:var(--font-m);font-size:34px;font-weight:700;color:var(--rose);
+  background:var(--bg-panel);border:1px solid var(--line-strong);border-radius:12px;
+  padding:8px 18px;letter-spacing:0.03em;text-shadow:0 0 18px rgba(251,124,147,0.5);
+}
+.unidade-odometro{font-size:11.5px;color:var(--text-faint);line-height:1.4;}
+.grade-hemacias{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;max-width:160px;}
+.hemacia-mini{
+  width:18px;height:18px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #f87171, #b91c1c);
+  box-shadow:inset 0 0 0 3px #7f1d1d;
+  transition:all 0.6s cubic-bezier(.4,0,.2,1);
+}
+.hemacia-mini.sumiu{opacity:0;transform:scale(0.2) rotate(80deg);}
+.rotulo-bloco{font-size:11px;color:var(--text-faint);line-height:1.45;}
+.rotulo-bloco .fixo{color:var(--cyan);font-weight:600;}
+
+.celula-ampliada{
+  width:66px;height:66px;border-radius:50%;overflow:hidden;
+  border:3px solid var(--line-strong);display:flex;flex-direction:column;
+  box-shadow:inset 0 0 12px rgba(0,0,0,0.4);
+}
+.segmento-hbo2{background:var(--rose);flex:0 0 68%;display:flex;align-items:flex-start;justify-content:center;}
+.segmento-hb{background:var(--bg-raised);flex:0 0 32%;}
+.legenda-celula{font-size:10.5px;font-weight:700;color:var(--text-dim);}
+
+.divisor-e{width:1px;align-self:stretch;background:var(--line);min-height:150px;}
+
+/* equação neutra (sempre igual, sem pista) */
+.faixa-equacao{
+  display:flex;align-items:center;justify-content:center;gap:12px;padding:16px 10px;
+  background:var(--bg-panel);border:1px solid var(--line);border-radius:14px;
+  font-family:var(--font-d);font-size:15.5px;font-weight:600;flex-wrap:wrap;
+}
+.faixa-equacao.pulsando{animation:pulsoEquacao 1.4s ease;}
+@keyframes pulsoEquacao{
+  0%{box-shadow:0 0 0 0 rgba(148,163,184,0);}
+  40%{box-shadow:0 0 0 6px rgba(148,163,184,0.08);}
+  100%{box-shadow:0 0 0 0 rgba(148,163,184,0);}
+}
+.termo-eq.hb-txt{color:var(--text-dim);}
+.termo-eq.o2-txt{color:var(--cyan);}
+.termo-eq.hbo2-txt{color:var(--rose);}
+.seta-eq{font-size:18px;font-weight:700;color:var(--text-faint);}
+.seta-eq.para-esquerda{color:var(--rose);transform:scale(1.4);text-shadow:0 0 16px rgba(251,124,147,0.6);display:inline-block;}
+.termo-eq.enfraquecido{opacity:0.4;}
+.termo-eq.fortalecido{opacity:1;text-shadow:0 0 14px currentColor;}
+
+/* status / reflexao */
+.bloco-status{margin-top:2px;padding:15px 18px;border-radius:14px;background:var(--bg-raised);border-left:3px solid var(--text-faint);min-height:60px;display:flex;flex-direction:column;justify-content:center;gap:4px;}
+.bloco-status.tom-pergunta{border-left-color:var(--amber);background:var(--amber-dim);}
+.status-linha1{font-size:12.5px;font-weight:600;color:var(--text-faint);}
+.status-linha2{font-size:14px;font-weight:500;color:var(--text);line-height:1.55;}
+
+.acao-camara{margin-top:auto;padding-top:16px;display:flex;justify-content:center;}
+
+.btn{font-family:var(--font-b);font-weight:600;font-size:14.5px;border-radius:12px;padding:13px 26px;border:none;cursor:pointer;transition:all 0.2s ease;}
+.btn-primario{background:var(--cyan);color:#00222b;}
+.btn-primario:hover{filter:brightness(1.08);}
+.btn-fantasma{background:transparent;border:1px solid var(--line-strong);color:var(--text-dim);}
+.btn-fantasma:hover{border-color:var(--cyan);color:var(--cyan);}
+
+/* ===== RESULTADO ===== */
+.painel-resultado{margin-top:22px;background:linear-gradient(180deg, var(--bg-panel-2), var(--bg-panel));border:1px solid var(--line);border-radius:var(--r-lg);padding:30px 32px;display:none;}
+.painel-resultado.visivel{display:block;animation:surgir 0.4s ease;}
+@keyframes surgir{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.veredito-cabecalho{display:flex;align-items:center;gap:14px;margin-bottom:6px;}
+.veredito-icone{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.veredito-icone.ok{background:var(--green-dim);border:1px solid var(--green);color:var(--green);}
+.veredito-icone.errou{background:var(--rose-dim);border:1px solid var(--rose);color:var(--rose);}
+.veredito-titulo{font-family:var(--font-d);font-size:19px;font-weight:700;}
+.veredito-sub{font-size:13.5px;color:var(--text-dim);margin-top:2px;}
+.texto-explicacao{font-size:14.5px;line-height:1.6;color:var(--text-dim);margin:16px 0 20px;max-width:680px;}
+
+.equacao-real{
+  display:flex;align-items:center;justify-content:center;gap:12px;padding:18px 10px;margin-bottom:22px;
+  background:var(--bg-base);border:1px solid var(--line);border-radius:14px;
+  font-family:var(--font-d);font-size:17px;font-weight:600;flex-wrap:wrap;
+}
+
+.passos-raciocinio{display:flex;flex-direction:column;gap:14px;margin-bottom:24px;}
+.passo{display:flex;gap:13px;align-items:flex-start;}
+.passo-num{width:26px;height:26px;border-radius:50%;background:var(--bg-raised);border:1px solid var(--line-strong);color:var(--cyan);font-family:var(--font-d);font-weight:700;font-size:12.5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.passo-texto{font-size:14.5px;line-height:1.55;color:var(--text);}
+.passo-texto strong{color:var(--cyan);font-weight:600;}
+.passo-texto em{color:var(--rose);font-style:normal;font-weight:600;}
+.rodape-resultado{display:flex;justify-content:center;}
+
+@media (max-width:600px){
+  .painel-enunciado, .camara, .painel-resultado{padding:22px 18px;}
+  .titulo-enunciado{font-size:22px;}
+  .equacao-mestra{font-size:16px;padding:10px 14px;flex-wrap:wrap;}
+  .painel-D{gap:20px;}
+  .instrumento-cabecalho{flex-direction:column;align-items:flex-start;}
+  .valor-coluna{align-items:flex-start;}
+}
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <section class="painel-enunciado">
+    <div class="eyebrow-cena">Físico-química · equilíbrio em solução</div>
+    <h1 class="titulo-enunciado">Em altitudes elevadas, a concentração de hemoglobina oxigenada (HbO₂) no sangue diminui. Essa alteração ocorre por causa do quê?</h1>
+    <p class="contexto-enunciado">Explore cada hipótese abaixo para observar como aquela variável se comporta na prática. Depois, pense: essa variável faz parte da expressão do equilíbrio? Só marque sua resposta quando tiver certeza.</p>
+    <div class="equacao-mestra">
+      <span>Hb (aq)</span> + <span class="esp-cy">O₂ (aq)</span> ⇌ <span class="esp-ro">HbO₂ (aq)</span>
+    </div>
+    <div class="progresso-linha">
+      <span id="txtProgresso">0 de 5 hipóteses testadas</span>
+      <div class="progresso-trilha"><div class="progresso-preenchimento" id="barraProgresso"></div></div>
+    </div>
+  </section>
+
+  <div class="grid-principal">
+
+    <div class="lista-alternativas">
+      <div class="titulo-secao">Hipóteses</div>
+
+      <div class="card-alt" data-letra="A" onclick="explorar('A', event)">
+        <div class="badge-letra">A</div>
+        <div class="corpo-alt">
+          <div class="texto-alt">Elevação da pressão arterial.</div>
+          <div class="rodape-alt">
+            <span class="tag-explorada">testado</span>
+            <button class="btn-marcar" onclick="marcar('A', event)">Marcar como resposta</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-alt" data-letra="B" onclick="explorar('B', event)">
+        <div class="badge-letra">B</div>
+        <div class="corpo-alt">
+          <div class="texto-alt">Aumento da temperatura corporal.</div>
+          <div class="rodape-alt">
+            <span class="tag-explorada">testado</span>
+            <button class="btn-marcar" onclick="marcar('B', event)">Marcar como resposta</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-alt" data-letra="C" onclick="explorar('C', event)">
+        <div class="badge-letra">C</div>
+        <div class="corpo-alt">
+          <div class="texto-alt">Redução da temperatura do ambiente.</div>
+          <div class="rodape-alt">
+            <span class="tag-explorada">testado</span>
+            <button class="btn-marcar" onclick="marcar('C', event)">Marcar como resposta</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-alt" data-letra="D" onclick="explorar('D', event)">
+        <div class="badge-letra">D</div>
+        <div class="corpo-alt">
+          <div class="texto-alt">Queda da pressão parcial de oxigênio.</div>
+          <div class="rodape-alt">
+            <span class="tag-explorada">testado</span>
+            <button class="btn-marcar" onclick="marcar('D', event)">Marcar como resposta</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-alt" data-letra="E" onclick="explorar('E', event)">
+        <div class="badge-letra">E</div>
+        <div class="corpo-alt">
+          <div class="texto-alt">Diminuição da quantidade de hemácias.</div>
+          <div class="rodape-alt">
+            <span class="tag-explorada">testado</span>
+            <button class="btn-marcar" onclick="marcar('E', event)">Marcar como resposta</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="camara" id="camara">
+      <div class="camara-cabecalho">
+        <div class="camara-titulo">Câmara de observação</div>
+        <div class="chip-hipotese" id="chipHipotese">nenhuma hipótese testada</div>
+      </div>
+
+      <div id="conteudoCamara">
+        <div class="placeholder-camara">
+          <div class="icone-grande">🏔️</div>
+          <p>Clique em uma alternativa ao lado para observar essa variável em ação.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <section class="painel-resultado" id="painelResultado">
+    <div class="veredito-cabecalho">
+      <div class="veredito-icone" id="veredictoIcone">✓</div>
+      <div>
+        <div class="veredito-titulo" id="veredictoTitulo">Resposta correta</div>
+        <div class="veredito-sub" id="veredictoSub">Alternativa D</div>
+      </div>
+    </div>
+    <p class="texto-explicacao" id="textoExplicacao"></p>
+
+    <div class="equacao-real" id="equacaoReal">
+      <span class="termo-eq hb-txt fortalecido">Hb (aq)</span>
+      <span>+</span>
+      <span class="termo-eq o2-txt fortalecido">O₂ (aq)</span>
+      <span class="seta-eq para-esquerda">←←</span>
+      <span class="termo-eq hbo2-txt enfraquecido">HbO₂ (aq)</span>
+    </div>
+
+    <div class="passos-raciocinio" id="passosRaciocinio">
+      <div class="passo"><div class="passo-num">1</div><div class="passo-texto"><strong>Ar rarefeito:</strong> quanto maior a altitude, menor a pressão total do ar e menor a <strong>pressão parcial de O₂ (pO₂)</strong>.</div></div>
+      <div class="passo"><div class="passo-num">2</div><div class="passo-texto"><strong>Lei de Henry:</strong> menos pressão de O₂ sobre a superfície alvéolo-sangue significa <strong>menor dissolução de O₂</strong> no plasma.</div></div>
+      <div class="passo"><div class="passo-num">3</div><div class="passo-texto"><strong>Le Chatelier:</strong> com a queda de [O₂], o equilíbrio se desloca para a <em>esquerda</em>, repondo o reagente que falta.</div></div>
+      <div class="passo"><div class="passo-num">4</div><div class="passo-texto"><strong>Consequência:</strong> mais HbO₂ se decompõe em Hb + O₂, reduzindo o oxigênio transportado — daí a hipoxia e as tonturas.</div></div>
+    </div>
+
+    <div class="rodape-resultado">
+      <button class="btn btn-fantasma" onclick="reiniciar()">Testar outra alternativa</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+const dados = {
+  A: {
+    hipotese:"Pressão arterial",
+    tituloInstrumento:"Manômetro · pressão arterial",
+    linha1:"Medindo a pressão nas artérias...",
+    reflexao:"Essa variável aparece na expressão do equilíbrio (Hb, O₂ ou HbO₂)? Pense antes de decidir.",
+    correta:false,
+    explicacaoFinal:"A pressão arterial é um fenômeno da hidrodinâmica circulatória: o sangue passa a circular mais rápido, mas isso não altera a concentração de Hb, O₂ ou HbO₂ dissolvidos — variáveis que não aparecem na expressão desse equilíbrio."
+  },
+  B: {
+    hipotese:"Temperatura corporal",
+    tituloInstrumento:"Termômetro · temperatura corporal",
+    linha1:"Medindo a temperatura interna...",
+    reflexao:"Essa variável aparece na expressão do equilíbrio (Hb, O₂ ou HbO₂)? Pense antes de decidir.",
+    correta:false,
+    explicacaoFinal:"O corpo mantém a homeotermia perto de 36,5 °C mesmo em grandes altitudes. Não existe aquecimento interno relevante o suficiente para explicar a queda de HbO₂, e a temperatura corporal não é uma concentração da expressão do equilíbrio."
+  },
+  C: {
+    hipotese:"Temperatura ambiente",
+    tituloInstrumento:"Termômetro · temperatura ambiente",
+    linha1:"Medindo a temperatura do ar externo...",
+    reflexao:"Essa variável aparece na expressão do equilíbrio (Hb, O₂ ou HbO₂)? Pense antes de decidir.",
+    correta:false,
+    explicacaoFinal:"Se o frio ambiente fosse a causa, qualquer dia gelado ao nível do mar provocaria mal das alturas — o que não acontece. A temperatura externa, isolada, não entra na expressão desse equilíbrio."
+  },
+  D: {
+    hipotese:"Pressão parcial de O₂",
+    tituloInstrumento:"Altímetro e nível de pO₂",
+    linha1:"Subindo a altitude e medindo a pO₂...",
+    reflexao:"Essa variável aparece na expressão do equilíbrio (Hb, O₂ ou HbO₂)? Pense antes de decidir.",
+    correta:true,
+    explicacaoFinal:"Em grandes altitudes a coluna de ar é menor, reduzindo a pressão parcial de oxigênio (pO₂). Pela Lei de Henry, dissolve-se menos O₂ no sangue — e essa concentração está diretamente na expressão do equilíbrio, que por Le Chatelier se desloca para a esquerda."
+  },
+  E: {
+    hipotese:"Quantidade de hemácias",
+    tituloInstrumento:"Contador de hemácias",
+    linha1:"Contando hemácias por mm³...",
+    reflexao:"As hemácias carregam a hemoglobina — cada uma tem cerca de 270 milhões de moléculas de Hb. Se elas diminuem, a quantidade total de Hb e HbO₂ cai junto. Mas a proporção entre Hb livre e HbO₂ dentro de cada célula não muda — e é essa proporção que a equação de equilíbrio descreve. Isso é deslocar o equilíbrio, ou só reduzir o total de transportadores?",
+    correta:false,
+    explicacaoFinal:"As hemácias carregam a hemoglobina, mas isso muda a quantidade total de Hb e HbO₂ no sangue — não a proporção entre Hb livre e HbO₂ que a equação de equilíbrio descreve. Por isso essa variável, sozinha, não desloca esse equilíbrio."
+  }
+};
+
+let explorados = new Set();
+let respostaMarcada = null;
+let confirmado = false;
+let timersAtivos = [];
+
+function limparTimers(){ timersAtivos.forEach(t=>clearTimeout(t)); timersAtivos=[]; }
+
+function atualizarProgresso(){
+  const n = explorados.size;
+  document.getElementById('txtProgresso').innerText = n + ' de 5 hipóteses testadas';
+  document.getElementById('barraProgresso').style.width = (n/5*100)+'%';
+}
+
+function formatarNum(v, casas){
+  return v.toFixed(casas).replace('.', ',');
+}
+
+function legendaTexto(de, para, casas, un){
+  return formatarNum(de, casas) + ' → ' + formatarNum(para, casas) + ' ' + un;
+}
+
+function animarNumero(elId, de, para, casas, unidade, duracao){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  const t0 = performance.now();
+  function passo(t){
+    const p = Math.min((t-t0)/duracao, 1);
+    const e = 1-Math.pow(1-p,3);
+    const val = de + (para-de)*e;
+    el.innerHTML = formatarNum(val, casas) + (unidade ? ' <small>'+unidade+'</small>' : '');
+    if(p<1) requestAnimationFrame(passo);
+  }
+  requestAnimationFrame(passo);
+}
+
+function unidadeValorTopo(letra){
+  if(letra==='A') return {de:120, para:145, casas:0, un:'mmHg'};
+  if(letra==='B') return {de:36.5, para:37.2, casas:1, un:'°C'};
+  if(letra==='C') return {de:22, para:4, casas:0, un:'°C'};
+  if(letra==='D') return {de:0, para:5000, casas:0, un:'m'};
+  return null;
+}
+const legendaO2D = {de:100, para:62, casas:0, un:'%'};
+const legendaHemaciasE = {de:5.2, para:4.4, casas:1, un:'milhões/mm³'};
+
+function visualInstrumento(letra){
+  if(letra==='A'){
+    return `
+      <div class="gauge-wrap">
+        <svg class="svg-gauge" viewBox="0 0 200 120">
+          <path d="M20,110 A80,80 0 0 1 180,110" fill="none" stroke="var(--line-strong)" stroke-width="10" stroke-linecap="round"/>
+          <line id="ponteiroA" x1="100" y1="110" x2="100" y2="42" stroke="var(--rose)" stroke-width="4" stroke-linecap="round" style="transform-origin:100px 110px; transform:rotate(-30deg); transition:transform 1.5s cubic-bezier(.22,1.4,.36,1);"/>
+          <circle cx="100" cy="110" r="8" fill="var(--text)"/>
+        </svg>
+      </div>
+      <div class="pulso-vaso-mini">
+        <div class="veia-mini"><div class="onda-pulso" id="ondaPulso"></div></div>
+      </div>`;
+  }
+  if(letra==='B'){
+    return `
+      <div class="termometro-wrap">
+        <div class="term-tubo"><div class="term-liquido" id="liqB" style="height:30%;"></div></div>
+        <div class="term-bulbo"><div class="term-bulbo-liquido"></div></div>
+      </div>
+      <div class="icone-corpo-glow" id="glowCorpo">🧍</div>`;
+  }
+  if(letra==='C'){
+    return `
+      <div class="termometro-wrap">
+        <div class="term-tubo"><div class="term-liquido term-liquido-frio" id="liqC" style="height:80%;"></div></div>
+        <div class="term-bulbo"><div class="term-bulbo-liquido bulbo-frio"></div></div>
+      </div>
+      <div class="neve-wrap" id="neveWrap">
+        <span class="floco" style="left:10%;">❄</span>
+        <span class="floco" style="left:35%;">❄</span>
+        <span class="floco" style="left:58%;">❄</span>
+        <span class="floco" style="left:80%;">❄</span>
+      </div>`;
+  }
+  if(letra==='D'){
+    return `
+      <div class="painel-D">
+        <div class="gauge-wrap">
+          <svg class="svg-gauge" viewBox="0 0 200 120">
+            <path d="M20,110 A80,80 0 0 1 180,110" fill="none" stroke="var(--line-strong)" stroke-width="10" stroke-linecap="round"/>
+            <line id="ponteiroD" x1="100" y1="110" x2="100" y2="42" stroke="var(--cyan)" stroke-width="4" stroke-linecap="round" style="transform-origin:100px 110px; transform:rotate(-90deg); transition:transform 1.6s cubic-bezier(.22,1.4,.36,1);"/>
+            <circle cx="100" cy="110" r="8" fill="var(--text)"/>
+          </svg>
+          <div class="montanha-silhueta" id="montanhaD"></div>
+        </div>
+        <div class="barra-o2-wrap">
+          <div class="barra-o2-label">Nível de pO₂</div>
+          <div class="barra-o2-container">
+            <div class="barra-o2-overlay" id="overlayO2" style="height:0%;"></div>
+          </div>
+          <div class="barra-o2-valor" id="valorO2">100%</div>
+          <div class="legenda-valor">${legendaTexto(legendaO2D.de, legendaO2D.para, legendaO2D.casas, legendaO2D.un)}</div>
+        </div>
+      </div>`;
+  }
+  if(letra==='E'){
+    let icones = '';
+    for(let i=0;i<13;i++) icones += '<span class="hemacia-mini" data-i="'+i+'"></span>';
+    return `
+      <div class="painel-E-grid">
+        <div class="bloco-e">
+          <div class="odometro" id="odometroE">5,2</div>
+          <div class="unidade-odometro">milhões de hemácias / mm³</div>
+          <div class="legenda-valor">${legendaTexto(legendaHemaciasE.de, legendaHemaciasE.para, legendaHemaciasE.casas, legendaHemaciasE.un)}</div>
+          <div class="grade-hemacias" id="gradeHemacias">${icones}</div>
+          <div class="rotulo-bloco"><span class="fixo">Quantidade total</span> no sangue</div>
+        </div>
+        <div class="divisor-e"></div>
+        <div class="bloco-e">
+          <div class="celula-ampliada">
+            <div class="segmento-hbo2"><span class="legenda-celula">HbO₂</span></div>
+            <div class="segmento-hb"></div>
+          </div>
+          <div class="rotulo-bloco">Proporção dentro de <span class="fixo">cada</span> hemácia<br>(não muda)</div>
+        </div>
+      </div>`;
+  }
+}
+
+function explorar(letra, ev){
+  if(ev) ev.stopPropagation();
+  if(confirmado) return;
+  limparTimers();
+
+  const item = dados[letra];
+  explorados.add(letra);
+  atualizarProgresso();
+
+  document.querySelectorAll('.card-alt').forEach(c=>c.classList.remove('explorando'));
+  document.querySelector('.card-alt[data-letra="'+letra+'"]').classList.add('explorada','explorando');
+
+  document.getElementById('chipHipotese').innerText = item.hipotese;
+
+  const topo = unidadeValorTopo(letra);
+  const cabecalhoValor = topo
+    ? `<div class="valor-coluna">
+         <div class="instrumento-valor" id="valorInstrumento">${formatarNum(topo.de, topo.casas)} <small>${topo.un}</small></div>
+         <div class="legenda-valor">${legendaTexto(topo.de, topo.para, topo.casas, topo.un)}</div>
+       </div>`
+    : '';
+
+  document.getElementById('conteudoCamara').innerHTML = `
+    <div class="painel-instrumento">
+      <div class="instrumento-cabecalho">
+        <div class="instrumento-titulo">${item.tituloInstrumento}</div>
+        ${cabecalhoValor}
+      </div>
+      <div class="instrumento-visual">${visualInstrumento(letra)}</div>
+    </div>
+
+    <div class="faixa-equacao" id="faixaEquacao" style="margin-top:14px;">
+      <span class="termo-eq hb-txt">Hb (aq)</span>
+      <span>+</span>
+      <span class="termo-eq o2-txt">O₂ (aq)</span>
+      <span class="seta-eq">⇌</span>
+      <span class="termo-eq hbo2-txt">HbO₂ (aq)</span>
+    </div>
+
+    <div class="bloco-status" id="blocoStatus" style="margin-top:14px;">
+      <div class="status-linha1" id="statusL1">${item.linha1}</div>
+      <div class="status-linha2" id="statusL2">Observando o instrumento...</div>
+    </div>
+
+    <div class="acao-camara">
+      <button class="btn btn-primario" id="btnMarcarCamara" onclick="marcar('${letra}')">Marcar esta como minha resposta</button>
+    </div>
+  `;
+
+  const t1 = setTimeout(()=>{ rodarAnimacaoInstrumento(letra); }, 100);
+  timersAtivos.push(t1);
+
+  const t2 = setTimeout(()=>{
+    document.getElementById('faixaEquacao').classList.add('pulsando');
+  }, 700);
+  timersAtivos.push(t2);
+
+  const t3 = setTimeout(()=>{
+    document.getElementById('statusL1').innerText = item.hipotese + ' registrada.';
+    document.getElementById('statusL2').innerText = item.reflexao;
+    document.getElementById('blocoStatus').classList.add('tom-pergunta');
+  }, 1700);
+  timersAtivos.push(t3);
+}
+
+function rodarAnimacaoInstrumento(letra){
+  const topo = unidadeValorTopo(letra);
+  if(topo) animarNumero('valorInstrumento', topo.de, topo.para, topo.casas, topo.un, 1500);
+
+  if(letra==='A'){
+    document.getElementById('ponteiroA').style.transform = 'rotate(45deg)';
+    document.getElementById('ondaPulso').classList.add('acelerado');
+  }
+  if(letra==='B'){
+    const liq = document.getElementById('liqB');
+    requestAnimationFrame(()=>{ liq.style.height = '58%'; });
+    document.getElementById('glowCorpo').classList.add('ativo');
+  }
+  if(letra==='C'){
+    const liq = document.getElementById('liqC');
+    requestAnimationFrame(()=>{ liq.style.height = '35%'; });
+  }
+  if(letra==='D'){
+    document.getElementById('ponteiroD').style.transform = 'rotate(60deg)';
+    document.getElementById('montanhaD').classList.add('subiu');
+    const overlay = document.getElementById('overlayO2');
+    requestAnimationFrame(()=>{ overlay.style.height = '38%'; });
+    animarNumero('valorO2', legendaO2D.de, legendaO2D.para, legendaO2D.casas, legendaO2D.un, 1500);
+  }
+  if(letra==='E'){
+    animarNumero('odometroE', legendaHemaciasE.de, legendaHemaciasE.para, legendaHemaciasE.casas, '', 1500);
+    const indices = [3, 8];
+    indices.forEach((idx, i)=>{
+      const t = setTimeout(()=>{
+        const el = document.querySelector('.hemacia-mini[data-i="'+idx+'"]');
+        if(el) el.classList.add('sumiu');
+      }, 500 + i*260);
+      timersAtivos.push(t);
+    });
+  }
+}
+
+function marcar(letra, ev){
+  if(ev) ev.stopPropagation();
+  if(confirmado) return;
+  if(!explorados.has(letra)) return;
+
+  respostaMarcada = letra;
+  document.querySelectorAll('.card-alt').forEach(c=>c.classList.remove('marcada'));
+  document.querySelector('.card-alt[data-letra="'+letra+'"]').classList.add('marcada');
+
+  const btnCamara = document.getElementById('btnMarcarCamara');
+  if(btnCamara){
+    btnCamara.innerText = 'Alternativa ' + letra + ' marcada — confirmar resposta';
+    btnCamara.setAttribute('onclick','confirmarResposta()');
+  }
+}
+
+function confirmarResposta(){
+  if(!respostaMarcada) return;
+  confirmado = true;
+  const escolhida = dados[respostaMarcada];
+  const acertou = escolhida.correta;
+
+  document.querySelectorAll('.card-alt').forEach(c=>{
+    const l = c.getAttribute('data-letra');
+    c.classList.remove('marcada','explorando');
+    if(l === respostaMarcada){
+      c.classList.add(acertou ? 'veredito-correta' : 'veredito-errada');
+    }
+  });
+
+  const painel = document.getElementById('painelResultado');
+  const icone = document.getElementById('veredictoIcone');
+  const titulo = document.getElementById('veredictoTitulo');
+  const sub = document.getElementById('veredictoSub');
+  const texto = document.getElementById('textoExplicacao');
+  const equacaoReal = document.getElementById('equacaoReal');
+  const passos = document.getElementById('passosRaciocinio');
+
+  if(acertou){
+    icone.className = 'veredito-icone ok'; icone.innerText = '✓';
+    titulo.innerText = 'Resposta correta';
+    sub.innerText = 'Alternativa D — queda da pressão parcial de oxigênio';
+    texto.innerText = escolhida.explicacaoFinal;
+    equacaoReal.style.display = 'flex';
+    passos.style.display = 'flex';
+  } else {
+    icone.className = 'veredito-icone errou'; icone.innerText = '✕';
+    titulo.innerText = 'Essa não é a causa';
+    sub.innerText = 'Alternativa ' + respostaMarcada + ' testada';
+    texto.innerText = escolhida.explicacaoFinal;
+    equacaoReal.style.display = 'none';
+    passos.style.display = 'none';
+  }
+
+  painel.classList.add('visivel');
+  painel.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function reiniciar(){
+  limparTimers();
+  explorados = new Set();
+  respostaMarcada = null;
+  confirmado = false;
+
+  document.querySelectorAll('.card-alt').forEach(c=>{
+    c.classList.remove('explorada','explorando','marcada','veredito-correta','veredito-errada');
+  });
+  atualizarProgresso();
+
+  document.getElementById('chipHipotese').innerText = 'nenhuma hipótese testada';
+  document.getElementById('conteudoCamara').innerHTML = `
+    <div class="placeholder-camara">
+      <div class="icone-grande">🏔️</div>
+      <p>Clique em uma alternativa ao lado para observar essa variável em ação.</p>
+    </div>`;
+
+  document.getElementById('painelResultado').classList.remove('visivel');
+}
+
+atualizarProgresso();
+</script>
+
+</body>
+</html>

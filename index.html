@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simuladores de Equilíbrio Químico — Escolha uma atividade</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg-base:#04060a;
+  --bg-panel:#0c1119;
+  --bg-panel-2:#111826;
+  --bg-raised:#161f2e;
+  --line:rgba(148,163,184,0.14);
+  --line-strong:rgba(148,163,184,0.28);
+  --cyan:#4dd8f0;
+  --cyan-dim:rgba(77,216,240,0.14);
+  --rose:#fb7c93;
+  --rose-dim:rgba(251,124,147,0.14);
+  --amber:#f5b942;
+  --amber-dim:rgba(245,185,66,0.16);
+  --green:#3ddc9b;
+  --green-dim:rgba(61,220,155,0.14);
+  --text:#eaeef4;
+  --text-dim:#93a0b4;
+  --text-faint:#5a6579;
+  --r-lg:22px;
+  --r-md:14px;
+  --font-d:'Space Grotesk',sans-serif;
+  --font-b:'Inter',sans-serif;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+
+body{
+  font-family:var(--font-b);
+  background:
+    radial-gradient(circle at 12% -5%, rgba(77,216,240,0.12), transparent 40%),
+    radial-gradient(circle at 88% 110%, rgba(251,124,147,0.1), transparent 45%),
+    radial-gradient(circle at 50% 50%, rgba(245,185,66,0.05), transparent 80%),
+    var(--bg-base);
+  color:var(--text);
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  padding:40px 18px;
+  position:relative;
+  overflow-x:hidden;
+}
+
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  opacity:0.3;
+  background-image:
+    radial-gradient(circle at 50% 18%, transparent 0, transparent 118px, rgba(148,163,184,0.04) 120px, transparent 122px),
+    radial-gradient(circle at 50% 18%, transparent 0, transparent 178px, rgba(148,163,184,0.035) 180px, transparent 182px),
+    radial-gradient(circle at 50% 18%, transparent 0, transparent 248px, rgba(148,163,184,0.025) 250px, transparent 252px);
+  background-repeat:no-repeat;
+  background-position:center -60px;
+}
+
+.container{
+  max-width:1280px;
+  margin:0 auto;
+  position:relative;
+  z-index:1;
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:48px;
+}
+
+/* ===== HEADER ===== */
+.header{text-align:center;margin-bottom:16px;}
+
+.titulo-principal{
+  font-family:var(--font-d);
+  font-size:42px;
+  font-weight:700;
+  line-height:1.2;
+  margin-bottom:12px;
+  background:linear-gradient(135deg, var(--cyan), var(--rose));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+
+.subtitulo-principal{
+  font-size:16px;
+  color:var(--text-dim);
+  line-height:1.6;
+  max-width:620px;
+  margin:0 auto;
+}
+
+/* ===== GRID DE SIMULADORES ===== */
+.grid-simuladores{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));
+  gap:24px;
+  margin-bottom:32px;
+}
+
+.card-simulador{
+  background:linear-gradient(180deg, var(--bg-panel-2), var(--bg-panel));
+  border:1px solid var(--line);
+  border-radius:var(--r-lg);
+  padding:32px;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  cursor:pointer;
+  transition:all 0.3s ease;
+  position:relative;
+  overflow:hidden;
+}
+
+.card-simulador::before{
+  content:"";
+  position:absolute;
+  top:-50%;
+  right:-50%;
+  width:300px;
+  height:300px;
+  border-radius:50%;
+  opacity:0;
+  transition:opacity 0.3s ease;
+  pointer-events:none;
+}
+
+.card-simulador.tipo-1::before{background:radial-gradient(circle, rgba(77,216,240,0.15), transparent 70%);}
+.card-simulador.tipo-2::before{background:radial-gradient(circle, rgba(251,124,147,0.15), transparent 70%);}
+.card-simulador.tipo-3::before{background:radial-gradient(circle, rgba(245,185,66,0.15), transparent 70%);}
+.card-simulador.tipo-4::before{background:radial-gradient(circle, rgba(61,220,155,0.15), transparent 70%);}
+
+.card-simulador:hover{
+  border-color:var(--line-strong);
+  transform:translateY(-4px);
+  box-shadow:0 12px 32px rgba(0,0,0,0.3);
+}
+
+.card-simulador:hover::before{opacity:1;}
+
+.card-simulador.tipo-1{border-top:3px solid var(--cyan);}
+.card-simulador.tipo-2{border-top:3px solid var(--rose);}
+.card-simulador.tipo-3{border-top:3px solid var(--amber);}
+.card-simulador.tipo-4{border-top:3px solid var(--green);}
+
+.icone-simulador{
+  font-size:48px;
+  display:inline-block;
+}
+
+.titulo-simulador{
+  font-family:var(--font-d);
+  font-size:20px;
+  font-weight:700;
+  line-height:1.35;
+  color:var(--text);
+  position:relative;
+  z-index:2;
+}
+
+.descricao-simulador{
+  font-size:14.5px;
+  line-height:1.6;
+  color:var(--text-dim);
+  flex:1;
+  position:relative;
+  z-index:2;
+}
+
+.badges-simulador{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  position:relative;
+  z-index:2;
+}
+
+.badge{
+  font-size:12px;
+  font-weight:600;
+  padding:5px 11px;
+  border-radius:999px;
+  border:1px solid;
+  white-space:nowrap;
+}
+
+.badge.tipo-1{background:var(--cyan-dim);border-color:var(--cyan);color:var(--cyan);}
+.badge.tipo-2{background:var(--rose-dim);border-color:var(--rose);color:var(--rose);}
+.badge.tipo-3{background:var(--amber-dim);border-color:var(--amber);color:var(--amber);}
+.badge.tipo-4{background:var(--green-dim);border-color:var(--green);color:var(--green);}
+
+.cta-simulador{
+  align-self:flex-start;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  font-family:var(--font-d);
+  font-size:14px;
+  font-weight:600;
+  color:var(--text-faint);
+  text-decoration:none;
+  padding:8px 0;
+  border-bottom:2px solid transparent;
+  transition:all 0.2s ease;
+  position:relative;
+  z-index:2;
+}
+
+.card-simulador.tipo-1 .cta-simulador{color:var(--cyan);border-bottom-color:transparent;}
+.card-simulador.tipo-2 .cta-simulador{color:var(--rose);border-bottom-color:transparent;}
+.card-simulador.tipo-3 .cta-simulador{color:var(--amber);border-bottom-color:transparent;}
+.card-simulador.tipo-4 .cta-simulador{color:var(--green);border-bottom-color:transparent;}
+
+.cta-simulador:hover{
+  border-bottom-color:currentColor;
+}
+
+.seta-cta{
+  display:inline-block;
+  transition:transform 0.2s ease;
+}
+
+.cta-simulador:hover .seta-cta{
+  transform:translateX(4px);
+}
+
+/* ===== FOOTER ===== */
+.footer{
+  text-align:center;
+  padding-top:32px;
+  border-top:1px solid var(--line);
+  color:var(--text-faint);
+  font-size:13px;
+}
+
+/* ===== RESPONSIVO ===== */
+@media (max-width:768px){
+  .titulo-principal{font-size:32px;}
+  .subtitulo-principal{font-size:14px;}
+  .grid-simuladores{grid-template-columns:1fr;gap:18px;}
+  .card-simulador{padding:24px;}
+  .titulo-simulador{font-size:18px;}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <section class="header">
+    <h1 class="titulo-principal">Simuladores de Equilíbrio Químico</h1>
+    <p class="subtitulo-principal">Explore diferentes contextos de Le Chatelier através de simulações interativas. Escolha uma atividade abaixo para começar a investigar.</p>
+  </section>
+
+  <section class="grid-simuladores">
+
+    <!-- CARTÃO DE COBALTO 1 -->
+    <a href="simulador_2.html" class="card-simulador tipo-1">
+      <div class="icone-simulador">🔵</div>
+      <h2 class="titulo-simulador">Equilíbrio do Cartão de Cobalto</h2>
+      <p class="descricao-simulador">Investigue como a temperatura e umidade afetam o equilíbrio entre complexos de cobalto rosa e azul. Entenda como as condições externas deslocam o sistema.</p>
+      <div class="badges-simulador">
+        <span class="badge tipo-1">Temperatura</span>
+        <span class="badge tipo-1">Concentração</span>
+      </div>
+      <span class="cta-simulador">Abrir simulador <span class="seta-cta">→</span></span>
+    </a>
+
+    <!-- CARTÃO DE COBALTO 2 -->
+    <a href="simulador_2_1.html" class="card-simulador tipo-2">
+      <div class="icone-simulador">💜</div>
+      <h2 class="titulo-simulador">Cartão de Cobalto — Avançado</h2>
+      <p class="descricao-simulador">Versão aprofundada do equilíbrio de cobalto com análise de velocidade de reação e efeitos termodinâmicos. Para aprofundar o conhecimento.</p>
+      <div class="badges-simulador">
+        <span class="badge tipo-2">Cinética</span>
+        <span class="badge tipo-2">Termodinâmica</span>
+      </div>
+      <span class="cta-simulador">Abrir simulador <span class="seta-cta">→</span></span>
+    </a>
+
+    <!-- MAL DAS ALTURAS -->
+    <a href="simulador_3.html" class="card-simulador tipo-3">
+      <div class="icone-simulador">🏔️</div>
+      <h2 class="titulo-simulador">Mal das Alturas e Hemoglobina</h2>
+      <p class="descricao-simulador">Por que a concentração de HbO₂ cai em grandes altitudes? Explore 5 hipóteses diferentes e aplique Le Chatelier a uma reação endotérmica real.</p>
+      <div class="badges-simulador">
+        <span class="badge tipo-3">Pressão parcial</span>
+        <span class="badge tipo-3">Bioquímica</span>
+      </div>
+      <span class="cta-simulador">Abrir simulador <span class="seta-cta">→</span></span>
+    </a>
+
+    <!-- FEBRE E HEMOGLOBINA -->
+    <a href="simulador_4.html" class="card-simulador tipo-4">
+      <div class="icone-simulador">🩺</div>
+      <h2 class="titulo-simulador">Febre e Hemoglobina Exotérmica</h2>
+      <p class="descricao-simulador">Diagnóstico clínico ambíguo: febre ou hipotermia? Descubra como uma reação exotérmica muda completamente o raciocínio de Le Chatelier.</p>
+      <div class="badges-simulador">
+        <span class="badge tipo-4">Temperatura</span>
+        <span class="badge tipo-4">Reação exotérmica</span>
+      </div>
+      <span class="cta-simulador">Abrir simulador <span class="seta-cta">→</span></span>
+    </a>
+
+  </section>
+
+  <footer class="footer">
+    <p>Simuladores desenvolvidos para exploração interativa de equilíbrio químico e o Princípio de Le Chatelier em contextos variados.</p>
+  </footer>
+
+</div>
+
+</body>
+</html>
